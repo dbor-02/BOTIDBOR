@@ -752,7 +752,7 @@ html {
 /* BAJAR EL CUADRO DEL TOTAL EN TELÉFONOS */
 @media (max-width: 768px) {
     #cart-items {
-        max-height: calc(50vh - 200px) !important; /* Más espacio para productos */
+        max-height: calc(50vh - 500px) !important; /* Más espacio para productos */
     }
     
     #cart-sidebar .bg-background\/50 {
