@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Botillería DBOR - POS</title>
+    
+    <!-- Favicon - Copa de vino -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 22h8'/%3E%3Cpath d='M7 10h10'/%3E%3Cpath d='M12 15v7'/%3E%3Cpath d='M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z'/%3E%3C/svg%3E">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#09090b',
+                        surface: '#18181b',
+                        surfaceHover: '#27272a',
+                        primary: '#10b981',
+                        primaryHover: '#059669',
+                        textMain: '#f4f4f5',
+                        textMuted: '#a1a1aa',
+                        border: '#3f3f46'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-background text-textMain min-h-screen min-h-dvh overflow-hidden flex flex-col md:flex-row font-sans">
+    
+    <!-- Barra de navegación móvil (visible solo en móvil) -->
+    <div class="md:hidden bg-surface border-b border-border flex items-center justify-between px-4 py-3">
+        <button id="mobile-home-logo" class="flex items-center gap-2">
+            <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <i data-lucide="wine" class="text-white w-5 h-5"></i>
+            </div>
+            <span class="font-bold text-base">DBOR POS</span>
+        </button>
+        <div class="flex gap-2">
+            <button id="mobile-nav-pos" class="mobile-nav-btn p-3 rounded-lg active" data-view="pos">
+                <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+            </button>
+            <button id="mobile-nav-inventory" class="mobile-nav-btn p-3 rounded-lg" data-view="inv">
+                <i data-lucide="package" class="w-6 h-6"></i>
+            </button>
+            <button id="mobile-nav-reports" class="mobile-nav-btn p-3 rounded-lg" data-view="rep">
+                <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar para desktop -->
+    <aside class="hidden md:flex w-20 bg-surface border-r border-border flex-col items-center py-6 gap-8 z-20 shadow-xl">
+        <a href="/" class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20 cursor-pointer hover:bg-primaryHover transition-colors" id="home-logo">
+            <i data-lucide="wine" class="text-white w-6 h-6"></i>
+        </a>
+        
+        <nav class="flex flex-col gap-4 w-full px-2">
+            <button id="nav-pos" class="nav-btn p-4 rounded-xl flex items-center justify-center group relative" title="Ventas">
+                <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+            </button>
+            <button id="nav-inventory" class="nav-btn p-4 rounded-xl flex items-center justify-center group relative" title="Inventario">
+                <i data-lucide="package" class="w-6 h-6"></i>
+            </button>
+            <button id="nav-reports" class="nav-btn p-4 rounded-xl flex items-center justify-center group relative" title="Reportes">
+                <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+            </button>
+        </nav>
+
+        <div class="mt-auto">
+            <button class="p-4 text-textMuted hover:text-white transition-colors">
+                <i data-lucide="settings" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Vista POS -->
+        <div id="view-pos" class="view-section active flex-1 flex flex-col md:flex-row">
+            <!-- Columna izquierda: Productos -->
+            <div class="flex-1 flex flex-col min-w-0 h-full">
+                <header class="h-16 md:h-20 border-b border-border flex items-center justify-between px-4 md:px-8 bg-background/50 backdrop-blur-md">
+                    <h1 class="text-base md:text-xl font-bold">Punto de Venta</h1>
+                    <div class="relative w-48 md:w-96">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textMuted"></i>
+                        <input type="text" id="search-input" placeholder="Buscar..." 
+                               class="w-full bg-surface border border-border rounded-xl pl-10 pr-4 py-1.5 md:py-2 text-xs md:text-sm focus:outline-none focus:border-primary transition-all">
+                    </div>
+                    
+                    <!-- Botón para abrir carrito en móvil -->
+                    <!-- Botón para abrir carrito en móvil -->
+                    <button id="mobile-cart-toggle" class="md:hidden p-3 bg-primary/10 text-primary rounded-lg relative ml-2">
+                            <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                            <span id="mobile-cart-count" class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </button>
+                </header>
+
+                <div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar pb-20 md:pb-8">
+                    <div id="category-filters" class="flex gap-2 mb-4 md:mb-8 overflow-x-auto pb-2 scrollbar-hide"></div>
+                    <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6"></div>
+                </div>
+            </div>
+
+           <!-- Carrito (en móvil ocupa toda la pantalla) -->
+            <div id="cart-sidebar" class="fixed lg:relative inset-0 lg:inset-y-0 lg:right-0 w-full lg:w-96 bg-surface shadow-2xl transform transition-transform duration-300 ease-in-out lg:transform-none z-30 lg:z-0 flex flex-col lg:border-l border-border" style="transform: translateX(100%);">
+                <!-- Cabecera del carrito -->
+                <div class="p-4 md:p-6 border-b border-border flex justify-between items-center">
+                    <h2 class="text-lg md:text-xl font-bold">Carrito de Compras</h2>
+                    <div class="flex items-center gap-2">
+                        <span id="cart-count" class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">0 items</span>
+                        <button id="close-cart-btn" class="md:hidden p-2 hover:bg-surfaceHover rounded-lg">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Items del carrito -->
+                <div id="cart-items" class="flex-1 overflow-y-auto p-3 md:p-4 space-y-2 md:space-y-3 custom-scrollbar"></div>
+
+                <!-- Totales y botones -->
+                <div class="p-4 md:p-6 bg-background/50 border-t border-border space-y-3 md:space-y-4">
+                    <div class="space-y-1 md:space-y-2">
+                        <div class="flex justify-between text-base md:text-lg text-textMuted">
+                            <span>Total</span>
+                            <span id="cart-subtotal" class="font-bold text-textMain">$0</span>
+                        </div>
+                    </div>
+                    <button id="checkout-btn" disabled class="w-full bg-primary text-white py-4 rounded-xl font-bold text-base hover:bg-primaryHover transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20">
+                        Finalizar Venta
+                    </button>
+                    <button onclick="window.clearCart()" class="w-full py-4 text-textMuted text-base hover:text-red-400 transition-colors font-medium bg-surfaceHover/30 rounded-lg hover:bg-surfaceHover/50 mt-2">
+                        Vaciar Carrito
+                        </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vista Inventario -->
+        <div id="view-inventory" class="view-section flex-1 p-4 md:p-8 bg-background overflow-y-auto">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold">Gestión de Inventario</h1>
+                        <p class="text-textMuted text-xs md:text-sm">Administra tus productos y stock</p>
+                    </div>
+                    <button id="add-product-btn" class="w-full sm:w-auto bg-primary text-white px-4 md:px-6 py-3 rounded-xl font-medium hover:bg-primaryHover transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/10 text-sm md:text-base">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Nuevo Producto
+                    </button>
+                </div>
+
+                <div class="mb-4 md:mb-6">
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textMuted"></i>
+                        <input type="text" id="inventory-search" 
+                               class="w-full bg-surface border border-border rounded-xl pl-10 pr-4 py-3 text-sm focus:border-primary outline-none transition-all" 
+                               placeholder="Buscar por nombre o ID...">
+                    </div>
+                </div>
+
+                <!-- Tabla para desktop, cards para móvil -->
+                <div class="hidden md:block bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
+                    <table class="w-full text-left">
+                        <thead class="bg-background/50 border-b border-border">
+                            <tr>
+                                <th onclick="window.toggleInventoryOrder()" class="px-6 py-4 font-medium text-xs uppercase tracking-wider text-textMuted cursor-pointer hover:text-primary transition-colors flex items-center gap-1">
+                                    ID <i data-lucide="arrow-up-down" class="w-3 h-3"></i>
+                                </th>
+                                <th class="px-6 py-4 font-medium text-xs uppercase tracking-wider text-textMuted">Producto</th>
+                                <th class="px-6 py-4 font-medium text-xs uppercase tracking-wider text-textMuted">Categoría</th>
+                                <th class="px-6 py-4 font-medium text-xs uppercase tracking-wider text-textMuted">Precio</th>
+                                <th class="px-6 py-4 font-medium text-xs uppercase tracking-wider text-textMuted">Stock</th>
+                                <th class="px-6 py-4 font-medium text-xs uppercase tracking-wider text-textMuted text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table-body" class="divide-y divide-border"></tbody>
+                    </table>
+                </div>
+
+                <!-- Cards para móvil -->
+                <div id="inventory-mobile-grid" class="md:hidden grid grid-cols-1 gap-4 pb-20"></div>
+            </div>
+        </div>
+
+        <!-- Vista Reportes -->
+        <div id="view-reports" class="view-section flex-1 p-4 md:p-8 bg-background overflow-y-auto">
+            <div class="max-w-7xl mx-auto px-2 md:px-4">
+                <h1 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">Reporte de Ventas</h1>
+                <div id="reports-container" class="w-full"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL DE PAGO (responsive) -->
+    <div id="payment-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-surface rounded-2xl w-full max-w-md border border-border shadow-2xl overflow-hidden">
+            <div class="p-4 md:p-6 border-b border-border">
+                <h3 class="text-lg md:text-xl font-bold flex items-center gap-2">
+                    <i data-lucide="credit-card" class="w-5 h-5 text-primary"></i>
+                    Finalizar Venta
+                </h3>
+            </div>
+            <div class="p-4 md:p-6 space-y-4">
+                <div class="bg-background p-4 rounded-xl border border-border">
+                    <p class="text-sm text-textMuted mb-1">Total a pagar</p>
+                    <p id="payment-total-amount" class="text-2xl md:text-3xl font-bold text-primary">$0</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-textMuted mb-2">Método de pago</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button id="method-cash" class="payment-method-btn border border-border p-3 rounded-xl flex flex-col items-center gap-1 hover:bg-surfaceHover transition-colors" data-method="cash">
+                            <i data-lucide="banknote" class="w-5 h-5"></i>
+                            <span class="text-xs">Efectivo</span>
+                        </button>
+                        <button id="method-card" class="payment-method-btn border border-border p-3 rounded-xl flex flex-col items-center gap-1 hover:bg-surfaceHover transition-colors" data-method="card">
+                            <i data-lucide="credit-card" class="w-5 h-5"></i>
+                            <span class="text-xs">Tarjeta</span>
+                        </button>
+                        <button id="method-transfer" class="payment-method-btn border border-border p-3 rounded-xl flex flex-col items-center gap-1 hover:bg-surfaceHover transition-colors" data-method="transfer">
+                            <i data-lucide="smartphone" class="w-5 h-5"></i>
+                            <span class="text-xs">Transferencia</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="cash-input-container" class="hidden space-y-2">
+                    <label for="cash-amount" class="block text-sm text-textMuted">Monto con que paga</label>
+                    <input type="text" id="cash-amount" class="w-full bg-background border border-border rounded-lg px-4 py-3 text-textMain focus:border-primary outline-none" placeholder="Ingrese monto en CLP" inputmode="numeric" pattern="[0-9]*">
+                    <div id="change-display" class="text-sm font-medium"></div>
+                </div>
+            </div>
+            <div class="p-4 md:p-6 bg-background/50 border-t border-border flex justify-end gap-3">
+                <button id="payment-cancel" class="px-4 md:px-6 py-3 text-sm font-medium text-textMuted hover:bg-surfaceHover rounded-xl transition-colors">Cancelar</button>
+                <button id="payment-confirm" class="px-4 md:px-6 py-3 text-sm font-medium bg-primary text-white rounded-xl hover:bg-primaryHover transition-all shadow-lg shadow-primary/20">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PARA PRODUCTO (responsive) -->
+    <div id="product-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-surface rounded-2xl w-full max-w-md border border-border shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="p-4 md:p-6 border-b border-border">
+                <h3 id="product-modal-title" class="text-lg md:text-xl font-bold flex items-center gap-2">
+                    <i data-lucide="package-plus" class="w-5 h-5 text-primary"></i>
+                    <span>Nuevo Producto</span>
+                </h3>
+            </div>
+            <div class="p-4 md:p-6 space-y-4">
+                <input type="hidden" id="product-id">
+                <div>
+                    <label class="block text-sm text-textMuted mb-1">Nombre</label>
+                    <input type="text" id="product-name" class="w-full bg-background border border-border rounded-lg px-4 py-3 text-textMain focus:border-primary outline-none" placeholder="Ej. Coca-Cola 2.5L">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-textMuted mb-1">Precio</label>
+                        <input type="text" id="product-price" class="w-full bg-background border border-border rounded-lg px-4 py-3 text-textMain focus:border-primary outline-none" placeholder="0" oninput="formatearPrecio(this)">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-textMuted mb-1">Stock</label>
+                        <input type="number" id="product-stock" class="w-full bg-background border border-border rounded-lg px-4 py-3 text-textMain focus:border-primary outline-none" placeholder="0">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm text-textMuted mb-1">Categoría</label>
+                    <select id="product-category" class="w-full bg-background border border-border rounded-lg px-4 py-3 text-textMain focus:border-primary outline-none">
+                        <option value="cervezas">Cervezas</option>
+                        <option value="vinos">Vinos</option>
+                        <option value="licores">Licores</option>
+                        <option value="bebidas">Bebidas</option>
+                        <option value="snacks">Snacks</option>
+                        <option value="otros">Otros</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-textMuted mb-1">URL Imagen</label>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="url" id="product-image" class="flex-1 bg-background border border-border rounded-lg px-4 py-3 text-textMain focus:border-primary outline-none" placeholder="https://...">
+                        <button id="use-default-image" class="bg-surfaceHover px-4 py-3 rounded-lg text-sm hover:bg-primary/20 transition-colors">Por defecto</button>
+                    </div>
+                    <p class="text-xs text-textMuted mt-1">Si no pones URL, se usará una imagen por defecto</p>
+                </div>
+            </div>
+            <div class="p-4 md:p-6 bg-background/50 border-t border-border flex justify-end gap-3">
+                <button id="product-cancel" class="px-4 md:px-6 py-3 text-sm font-medium text-textMuted hover:bg-surfaceHover rounded-xl transition-colors">Cancelar</button>
+                <button id="product-save" class="px-4 md:px-6 py-3 text-sm font-medium bg-primary text-white rounded-xl hover:bg-primaryHover transition-all shadow-lg shadow-primary/20">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed bottom-4 right-4 left-4 md:left-auto z-50 transform transition-all duration-300 translate-y-2 opacity-0"></div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
