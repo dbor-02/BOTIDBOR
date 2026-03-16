@@ -740,7 +740,7 @@ html {
 /* BAJAR EL CUADRO DEL TOTAL PARA VER MÁS PRODUCTOS */
 @media (max-width: 768px) {
     #cart-items {
-        max-height: calc(50vh - 50px) !important;
+        max-height: calc(50vh - 55px) !important;
     }
     
     #cart-sidebar .bg-background\/50 {
